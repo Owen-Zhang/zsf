@@ -13,21 +13,16 @@ const fileConfigDir = "etc"
 
 //FileSource 文件配制实例
 type FileSource struct {
-	enableWatch bool       //是否监控文件变化
-	changed     chan Event //变化提示channel
+	changed chan Event //变化提示channel
 }
 
 //NewFileSource 实例化文件配制
 //会读取etc目录下面的文件信息
-func NewFileSource(enableWatch bool) IProvider {
+func NewFileSource() IProvider {
 	fileSource := &FileSource{
-		enableWatch: enableWatch,
-		changed:     make(chan Event, 6),
+		changed: make(chan Event, 6),
 	}
-	if fileSource.enableWatch {
-		go fileSource.watch()
-	}
-	fileSource.obtainAll()
+	go fileSource.watch()
 	return fileSource
 }
 
@@ -52,13 +47,15 @@ func (f FileSource) watch() {
 			//如果新增配制文件需要保存一下，如果监控create会造成在修改文件时同时会
 			//触发write和create
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				content, err := f.get(event.Name)
+				//fileName := strings.Split(event.Name, "\\")[1]
+				fileName := strings.Split(event.Name, "/")[1]
+				content, err := f.Get(fileName)
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
 				f.changed <- Event{
-					FileName: strings.Split(event.Name, "/")[1],
+					FileName: fileName,
 					Content:  content,
 				}
 			}
@@ -71,8 +68,8 @@ func (f FileSource) watch() {
 	}
 }
 
-//返回单个文件配制信息
-func (f FileSource) get(fileName string) ([]byte, error) {
+//Get 返回单个文件配制信息
+func (f FileSource) Get(fileName string) ([]byte, error) {
 	return ioutil.ReadFile(filepath.Join(fileConfigDir, fileName))
 }
 
@@ -81,24 +78,24 @@ func (f FileSource) Notify() chan Event {
 	return f.changed
 }
 
-//obtainAll 加载所有的配制文件
-func (f FileSource) obtainAll() {
-	files, err := ioutil.ReadDir(fileConfigDir)
-	if err != nil {
-		panic(err)
-	}
-	if len(files) == 0 {
-		return
-	}
-	for _, file := range files {
-		fileName := file.Name()
-		content, err := f.get(fileName)
-		if err != nil {
-			panic(err)
-		}
-		f.changed <- Event{
-			FileName: fileName,
-			Content:  content,
-		}
-	}
-}
+//ObtainAll 加载所有的配制文件
+// func (f FileSource) ObtainAll() {
+// 	files, err := ioutil.ReadDir(fileConfigDir)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	if len(files) == 0 {
+// 		return
+// 	}
+// 	for _, file := range files {
+// 		fileName := file.Name()
+// 		content, err := f.get(fileName)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		f.changed <- Event{
+// 			FileName: fileName,
+// 			Content:  content,
+// 		}
+// 	}
+// }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Owen-Zhang/zsf/common/flag"
-
 	"github.com/Owen-Zhang/zsf/config"
 )
 
@@ -15,15 +13,19 @@ type App struct {
 
 //LoadConfig 加载配制文件
 func (a App) LoadConfig() {
-	enablWatch := flag.Bool("watch")
-	config.Init(enablWatch)
+	//enablWatch := flag.Bool("watch")
+	config.Init()
 }
 
 func main() {
 	app := &App{}
 	app.LoadConfig()
 
-	fmt.Println(string(config.Get("mysql.yaml")))
+	content, err := config.Get("mysql.yaml")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(content))
 	for {
 		time.Sleep(10 * time.Second)
 	}
