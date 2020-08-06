@@ -46,7 +46,7 @@ func (f FileSource) watch() {
 			}
 			//如果新增配制文件需要保存一下，如果监控create会造成在修改文件时同时会
 			//触发write和create
-			if event.Op&fsnotify.Write == fsnotify.Write {
+			if event.Op&fsnotify.Write == fsnotify.Write && !strings.HasSuffix(event.Name, ".swap") {
 				//fileName := strings.Split(event.Name, "\\")[1]
 				fileName := strings.Split(event.Name, "/")[1]
 				content, err := f.Get(fileName)
