@@ -20,6 +20,9 @@ func (a App) LoadConfig() {
 }
 
 func main() {
+	app := &App{}
+	app.LoadConfig()
+
 	fmt.Println(string(config.Get("mysql.yaml")))
 	for {
 		time.Sleep(10 * time.Second)
