@@ -1,8 +1,9 @@
 package config
 
 import (
-	"fmt"
 	"sync"
+
+	"github.com/toolkits/pkg/logger"
 )
 
 var def *configuration = nil
@@ -29,7 +30,7 @@ func Init() {
 }
 
 //Get 通过配制文件名获取配制内容
-func Get(fileName string) (result []byte, err error) {
+func Get(fileName string) (result []byte) {
 	def.mutex.RLock()
 	result = def.contents[fileName]
 	def.mutex.RUnlock()
@@ -45,7 +46,7 @@ func wathChange() {
 		select {
 		case event, ok := <-def.provider.Notify():
 			if !ok {
-				fmt.Println("监控配制更新的channel关闭")
+				logger.Error("监控配制更新的channel关闭")
 				return
 			}
 			updateConfig(event)
@@ -58,5 +59,4 @@ func updateConfig(event Event) {
 	def.mutex.Lock()
 	def.contents[event.FileName] = event.Content
 	defer def.mutex.Unlock()
-	fmt.Println(def.contents)
 }

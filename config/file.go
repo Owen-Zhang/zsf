@@ -1,12 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/toolkits/pkg/logger"
 )
 
 const fileConfigDir = "etc"
@@ -30,13 +30,15 @@ func NewFileSource() IProvider {
 func (f FileSource) watch() {
 	fileWather, err := fsnotify.NewWatcher()
 	if err != nil {
-		fmt.Println(err)
+		logger.Errorf("监控配制文件变化出现错误: %+v", err)
+		return
 	}
 	defer fileWather.Close()
 	//这里只能watch文件夹，watch文件不能正常的收到更新信息,而且windows下有两次更新提醒
 	//所以这个只能用在linux下面,其它平台没有测试
 	if err := fileWather.Add("etc"); err != nil {
-		fmt.Printf("add watch file has wrong: %v\n", err)
+		logger.Errorf("增加监控目录[etc]出现错误: %+v", err)
+		return
 	}
 	for {
 		select {
@@ -49,9 +51,8 @@ func (f FileSource) watch() {
 			if event.Op&fsnotify.Write == fsnotify.Write && !strings.HasSuffix(event.Name, ".swp") {
 				//fileName := strings.Split(event.Name, "\\")[1]
 				fileName := strings.Split(event.Name, "/")[1]
-				content, err := f.Get(fileName)
+				content := f.Get(fileName)
 				if err != nil {
-					fmt.Println(err)
 					continue
 				}
 				f.changed <- Event{
@@ -63,39 +64,22 @@ func (f FileSource) watch() {
 			if !ok {
 				return
 			}
-			fmt.Printf("watch file has err:%v\n", err)
+			logger.Errorf("fileWather返回错误: %+v", err)
 		}
 	}
 }
 
 //Get 返回单个文件配制信息
-func (f FileSource) Get(fileName string) ([]byte, error) {
-	return ioutil.ReadFile(filepath.Join(fileConfigDir, fileName))
+func (f FileSource) Get(fileName string) (result []byte) {
+	result, err := ioutil.ReadFile(filepath.Join(fileConfigDir, fileName))
+	if err != nil {
+		logger.Errorf("返回单个文件配制信息出错: %+v", err)
+		return
+	}
+	return
 }
 
 //Notify 更新通知
 func (f FileSource) Notify() chan Event {
 	return f.changed
 }
-
-//ObtainAll 加载所有的配制文件
-// func (f FileSource) ObtainAll() {
-// 	files, err := ioutil.ReadDir(fileConfigDir)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	if len(files) == 0 {
-// 		return
-// 	}
-// 	for _, file := range files {
-// 		fileName := file.Name()
-// 		content, err := f.get(fileName)
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		f.changed <- Event{
-// 			FileName: fileName,
-// 			Content:  content,
-// 		}
-// 	}
-// }
