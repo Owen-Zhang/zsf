@@ -35,7 +35,7 @@ func (a App) InitLog() {
 func (a App) initMaxProcs() {
 	//1 应该去取配制("maxProc")
 	maxProc := runtime.NumCPU()
-	
+
 	if maxProc <= 0 {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		return
@@ -57,6 +57,6 @@ func main() {
 	app.LoadConfig()
 	for {
 		time.Sleep(10 * time.Second)
-		fmt.Println(string(config.Get("mysql.yaml")))
+		fmt.Println(config.Get("mysql.yaml"))
 	}
 }

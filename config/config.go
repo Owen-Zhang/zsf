@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/toolkits/pkg/logger"
+	"gopkg.in/yaml.v2"
 )
 
 var def *configuration = nil
@@ -13,16 +14,16 @@ var def *configuration = nil
 //使用方得到内容后要将内容反序列化并保存，更新时会通知
 type configuration struct {
 	provider IProvider
-	mutex    sync.RWMutex      //读写锁
-	contents map[string][]byte //文件->配制内容
-	watcher  map[string]func() //文件->回调方法(有更新后)
+	mutex    sync.RWMutex                      //读写锁
+	contents map[string]map[string]interface{} //文件名->配制内容
+	watcher  map[string]func()                 //文件名->回调方法(有更新后)
 }
 
 //Init 初始化配制信息
 func Init() {
 	def = &configuration{
 		mutex:    sync.RWMutex{},
-		contents: make(map[string][]byte),
+		contents: make(map[string]map[string]interface{}),
 		watcher:  make(map[string]func()),
 		provider: NewFileSource(),
 	}
@@ -30,16 +31,18 @@ func Init() {
 }
 
 //Get 通过配制文件名获取配制内容(可以返回一些类型对象)
-//Get(fileName).Map(key) todo
-func Get(fileName string) (result []byte) {
-	logger.Info(fileName)
+func Get(fileName string) map[string]interface{} {
 	def.mutex.RLock()
-	result = def.contents[fileName]
+	result, ok := def.contents[fileName]
 	def.mutex.RUnlock()
-	if result != nil && len(result) > 0 {
-		return
+	if ok {
+		return result
 	}
-	return def.provider.Get(fileName)
+	tmpContent := def.provider.Get(fileName)
+	if tmpContent == nil || len(tmpContent) == 0 {
+		return map[string]interface{}{}
+	}
+	return updateConfig(fileName, tmpContent)
 }
 
 //wathChange 监控配制对象更新
@@ -51,14 +54,29 @@ func wathChange() {
 				logger.Error("监控配制更新的channel关闭")
 				return
 			}
-			updateConfig(event)
+			updateConfig(event.FileName, event.Content)
 		}
 	}
 }
 
 //updateConfig 更新配制信息
-func updateConfig(event Event) {
+func updateConfig(fileName string, content []byte) map[string]interface{} {
+	if content == nil || len(content) == 0 {
+		return map[string]interface{}{}
+	}
 	def.mutex.Lock()
-	def.contents[event.FileName] = event.Content
+	val, ok := def.contents[fileName]
+	if !ok {
+		val = make(map[string]interface{})
+	}
+	unMarshal(fileName, content, val)
 	defer def.mutex.Unlock()
+	return val
+}
+
+//unMarshal yaml文件反序列化成map
+func unMarshal(fileName string, content []byte, m map[string]interface{}) {
+	if err := yaml.Unmarshal(content, m); err != nil {
+		logger.Errorf("反序列化[%s]配制内容失败:%+v", fileName, err)
+	}
 }

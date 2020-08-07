@@ -1,4 +1,3 @@
-logger:
-  dir: logs
-  level: WARNING
-  keepHours: 12
+dir: logs
+level: WARNING
+keepHours: 12
