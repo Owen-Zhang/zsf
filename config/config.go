@@ -31,6 +31,7 @@ func Init() {
 
 //Get 通过配制文件名获取配制内容
 func Get(fileName string) (result []byte) {
+	logger.Info(fileName)
 	def.mutex.RLock()
 	result = def.contents[fileName]
 	def.mutex.RUnlock()
