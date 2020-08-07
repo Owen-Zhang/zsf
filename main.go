@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"time"
 
 	"github.com/Owen-Zhang/zsf/config"
@@ -28,6 +29,19 @@ func (a App) InitLog() {
 	lb.SetRotateByHour(true)
 	lb.SetKeepHours(24)
 	logger.SetLogging(logger.ERROR, lb)
+}
+
+//initMaxProcs 设置process
+func (a App) initMaxProcs() {
+	//1 应该去取配制("maxProc")
+	maxProc := runtime.NumCPU()
+	
+	if maxProc <= 0 {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+		return
+	}
+	runtime.GOMAXPROCS(maxProc)
+
 }
 
 //clean 清理工作

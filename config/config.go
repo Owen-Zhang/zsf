@@ -29,7 +29,8 @@ func Init() {
 	go wathChange()
 }
 
-//Get 通过配制文件名获取配制内容
+//Get 通过配制文件名获取配制内容(可以返回一些类型对象)
+//Get(fileName).Map(key) todo
 func Get(fileName string) (result []byte) {
 	logger.Info(fileName)
 	def.mutex.RLock()
