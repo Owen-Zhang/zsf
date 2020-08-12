@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Owen-Zhang/zsf/config"
@@ -22,20 +21,19 @@ func Init() {
 //Update 更新日志配制信息
 //level: "FATAL","ERROR","WARNING","INFO","DEBUG"
 func Update() {
-	var set setting
-	if err := config.UnmarshalFile("logger.yaml", &set); err != nil {
+	set := &Setting{}
+	if err := config.UnmarshalFile("logger.yaml", set); err != nil {
 		logger.Error(err)
 		return
 	}
-	if strings.TrimSpace(set.level) != "" {
-		fmt.Println(set.level)
-		logger.SetSeverity(set.level)
+	if strings.TrimSpace(set.Level) != "" {
+		logger.SetSeverity(set.Level)
 	}
-	if set.keepHours > 0 {
-		logger.SetKeepHours(set.keepHours)
+	if set.KeepHours > 0 {
+		logger.SetKeepHours(set.KeepHours)
 	}
 
-	logger.SetRotateByHour(set.rotateByHour)
+	logger.SetRotateByHour(set.RotateByHour)
 }
 
 //Close 关闭日志(flush到disk)
