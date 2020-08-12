@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Owen-Zhang/zsf/config"
@@ -27,6 +28,7 @@ func Update() {
 		return
 	}
 	if strings.TrimSpace(set.level) != "" {
+		fmt.Println(set.level)
 		logger.SetSeverity(set.level)
 	}
 	if set.keepHours > 0 {

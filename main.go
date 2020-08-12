@@ -21,10 +21,6 @@ func main() {
 
 	config.Init()
 	log.Update()
-
-	go func() {
-
-	}()
 	for {
 		time.Sleep(10 * time.Second)
 		logger.Error("error from test")
