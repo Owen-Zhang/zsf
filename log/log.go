@@ -22,7 +22,7 @@ func Init() {
 //level: "FATAL","ERROR","WARNING","INFO","DEBUG"
 func Update() {
 	var set setting
-	if err := config.UnmarshalFile("logger", &set); err != nil {
+	if err := config.UnmarshalFile("logger.yaml", &set); err != nil {
 		logger.Error(err)
 		return
 	}
