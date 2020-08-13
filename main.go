@@ -15,10 +15,6 @@ func main() {
 	log.Init()
 	defer log.Close()
 
-	logger.Error("error from test")
-	logger.Warning("warning from test")
-	logger.Info("info from test")
-
 	config.Init()
 	log.Update()
 	for {

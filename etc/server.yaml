@@ -1,0 +1,6 @@
+http:
+  mode: debug
+  port: 8080
+jwt:
+  timeout: 3600
+  secret: qwertyuiop

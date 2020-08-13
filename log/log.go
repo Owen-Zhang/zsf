@@ -1,8 +1,6 @@
 package log
 
 import (
-	"strings"
-
 	"github.com/Owen-Zhang/zsf/config"
 	"github.com/toolkits/pkg/logger"
 )
@@ -21,18 +19,13 @@ func Init() {
 //Update 更新日志配制信息
 //level: "FATAL","ERROR","WARNING","INFO","DEBUG"
 func Update() {
-	set := &Setting{}
+	set := defaultConfig()
 	if err := config.UnmarshalFile("logger.yaml", set); err != nil {
 		logger.Error(err)
 		return
 	}
-	if strings.TrimSpace(set.Level) != "" {
-		logger.SetSeverity(set.Level)
-	}
-	if set.KeepHours > 0 {
-		logger.SetKeepHours(set.KeepHours)
-	}
-
+	logger.SetSeverity(set.Level)
+	logger.SetKeepHours(set.KeepHours)
 	logger.SetRotateByHour(set.RotateByHour)
 }
 

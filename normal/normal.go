@@ -9,15 +9,10 @@ import (
 
 //Init 初始系统运行参数
 func Init() {
-	var systemInfo SystemP
+	systemInfo := defaultConfig()
 	if err := config.UnmarshalFile("common.yaml", &systemInfo); err != nil {
 		logger.Error(err)
 		return
 	}
-
-	maxProc := systemInfo.MaxProc
-	if maxProc <= 0 {
-		maxProc = runtime.NumCPU()
-	}
-	runtime.GOMAXPROCS(maxProc)
+	runtime.GOMAXPROCS(systemInfo.MaxProc)
 }
