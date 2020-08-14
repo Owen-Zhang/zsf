@@ -27,6 +27,11 @@ func (app *Application) InitRoute(route xserver.RouteFunc) {
 	route(app.api)
 }
 
+//Start 开始运行
+func (app *Application) Start() {
+	app.api.Start()
+}
+
 //Close 关闭要处理的一些事情
 func (app *Application) Close() {
 	log.Close()

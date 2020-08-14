@@ -9,35 +9,30 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
-//Auth 验证用户登陆,以及构造用户信息
-func Auth(jwtConfig config.JwtConf) gin.HandlerFunc {
+const TOKEN = "Token"
+
+//AuthValid 验证用户登陆,以及构造用户信息
+func AuthValid(jwtConfig config.JwtConf) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if len(jwtConfig.ExcludePath) == 0 ||
 			isContainPath(jwtConfig.ExcludePath, c.Request.URL.Path) {
 			c.Next()
 			return
 		}
-		token := c.GetHeader("token")
+		token := c.GetHeader(TOKEN)
 		if strings.TrimSpace(token) == "" {
 			c.AbortWithStatus(403)
 			return
 		}
+
 		data, err := xjwt.Decrypt(token, jwtConfig.Secret)
 		if err != nil {
-			logger.Errorf("token 解析出错:%+v", err)
+			logger.Errorf("Token 解析出错:%+v", err)
 			c.AbortWithStatus(403)
 			return
 		}
 		c.Set("login_data", data)
-
 		c.Next()
-
-		tokenNew, err := xjwt.Encrypt(jwtConfig.Secret, data, jwtConfig.TimeOut)
-		if err != nil {
-			logger.Errorf("生成token出错:%+v", err)
-			return
-		}
-		c.Writer.Header().Set("token", tokenNew)
 	}
 }
 

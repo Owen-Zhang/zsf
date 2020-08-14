@@ -35,8 +35,18 @@ func Init() *Server {
 }
 
 func newserver(set *config.Setting) *Server {
+	ginEngine := gin.New()
+	gin.SetMode(set.Http.Mode)
+	ginEngine.Use(
+		middleware.Recovery(),
+		middleware.Log(),
+		middleware.Cors(),
+		middleware.AuthValid(set.Jwt),
+		middleware.Response(),
+		middleware.AuthReply(set.Jwt),
+	)
 	return &Server{
-		Engine: gin.New(),
+		Engine: ginEngine,
 		config: set,
 		server: &http.Server{
 			ReadTimeout:    10 * time.Second,
@@ -48,14 +58,14 @@ func newserver(set *config.Setting) *Server {
 
 //Start api开始监听服务
 func (s *Server) Start() {
-	gin.SetMode(s.config.Http.Mode)
-	s.Engine.Use(
-		middleware.Recovery(),
-		middleware.Log(),
-		middleware.Cors(),
-		middleware.Auth(s.config.Jwt),
-		middleware.Response(),
-	)
+	// gin.SetMode(s.config.Http.Mode)
+	// s.Engine.Use(
+	// 	middleware.Recovery(),
+	// 	middleware.Log(),
+	// 	middleware.Cors(),
+	// 	middleware.Auth(s.config.Jwt),
+	// 	middleware.Response(),
+	// )
 	s.server.Addr = fmt.Sprintf(":%d", s.config.Http.Port)
 	s.server.Handler = s.Engine
 
@@ -64,6 +74,7 @@ func (s *Server) Start() {
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("服务启动失败:%+v", err)
 		}
+		logger.Infof("服务启动成功,对外端口为: %d", s.config.Http.Port)
 	}()
 }
 

@@ -16,7 +16,6 @@ func Response() gin.HandlerFunc {
 		if ctx.Writer.Written() {
 			return
 		}
-
 		data, ok := ctx.Get("result")
 		if !ok {
 			ctx.AbortWithStatusJSON(
@@ -24,6 +23,7 @@ func Response() gin.HandlerFunc {
 				model.ResData{
 					Status: model.Success,
 				})
+			return
 		}
 		switch tmp := data.(type) {
 		case string:
