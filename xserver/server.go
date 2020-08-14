@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/Owen-Zhang/zsf/common/cast"
+	cnf "github.com/Owen-Zhang/zsf/config"
+	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/Owen-Zhang/zsf/xserver/middleware"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
@@ -18,12 +20,21 @@ type RouteFunc func(*Server)
 
 //Server api服务
 type Server struct {
-	*gin.Engine          //gin
-	config      *Setting //配制信息
+	*gin.Engine                 //gin
+	config      *config.Setting //配制信息
 	server      *http.Server
 }
 
-func newserver(set *Setting) *Server {
+//Init 对外服务实例化
+func Init() *Server {
+	set := config.DefaultConfig()
+	if err := cnf.UnmarshalFile("server.yaml", set); err != nil {
+		logger.Fatal(err)
+	}
+	return newserver(set)
+}
+
+func newserver(set *config.Setting) *Server {
 	return &Server{
 		Engine: gin.New(),
 		config: set,

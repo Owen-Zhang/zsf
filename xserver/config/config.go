@@ -1,9 +1,4 @@
-package xserver
-
-import (
-	"github.com/Owen-Zhang/zsf/config"
-	"github.com/toolkits/pkg/logger"
-)
+package config
 
 //Setting 对外提供api接口配制信息
 type Setting struct {
@@ -24,16 +19,8 @@ type JwtConf struct {
 	ExcludePath []string `yaml:"excludepath"` //不需要验证的路径信息
 }
 
-//Init 对外服务实例化
-func Init() *Server {
-	set := defaultConfig()
-	if err := config.UnmarshalFile("server.yaml", set); err != nil {
-		logger.Fatal(err)
-	}
-	return newserver(set)
-}
-
-func defaultConfig() *Setting {
+//DefaultConfig api默认配制
+func DefaultConfig() *Setting {
 	return &Setting{
 		Http: Http{
 			Mode: "debug",
