@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Owen-Zhang/zsf/common/model"
 	"github.com/gin-gonic/gin"
 	"github.com/toolkits/pkg/logger"
 )
@@ -28,11 +29,6 @@ func Recovery() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
-				// if e, ok := err.(errors.PageError); ok {
-				// 	c.JSON(200, gin.H{"err": e.Message})
-				// 	c.Abort()
-				// 	return
-				// }
 				var brokenPipe bool
 				if ne, ok := err.(*net.OpError); ok {
 					if se, ok := ne.Err.(*os.SyscallError); ok {
@@ -58,7 +54,10 @@ func Recovery() gin.HandlerFunc {
 					c.Error(err.(error))
 					c.Abort()
 				} else {
-					c.AbortWithStatus(http.StatusInternalServerError)
+					c.JSON(http.StatusOK, model.ResData{
+						Status:  model.Fail,
+						Message: "访问出错,请联系管理员",
+					})
 				}
 			}
 		}()

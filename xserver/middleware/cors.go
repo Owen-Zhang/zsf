@@ -7,7 +7,7 @@ import (
 )
 
 //Cors 跨域设置
-func cors() gin.HandlerFunc {
+func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
 		setHeaderInfo(c)

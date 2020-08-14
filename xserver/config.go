@@ -7,8 +7,8 @@ import (
 
 //Setting 对外提供api接口配制信息
 type Setting struct {
-	Http Http `yaml:"http"` //服务启动信息
-	Jwt  Jwt  `yaml:"jwt"`  //用户登陆验证信息
+	Http Http    `yaml:"http"` //服务启动信息
+	Jwt  JwtConf `yaml:"jwt"`  //用户登陆验证信息
 }
 
 //Http 服务器信息
@@ -17,18 +17,20 @@ type Http struct {
 	Port int    `yaml:"port"` //端口
 }
 
-//Jwt 验证用户
-type Jwt struct {
-	TimeOut int64  `yaml:"timeout"` //超时时间 默认30分钟 1800秒
-	Secret  string `yaml:"secret"`  //jwt签名用到的密钥 默认 qwertyuiop
+//JwtConf 验证用户
+type JwtConf struct {
+	TimeOut     int64    `yaml:"timeout"`     //超时时间 默认30分钟 1800秒
+	Secret      string   `yaml:"secret"`      //jwt签名用到的密钥 默认 qwertyuiop
+	ExcludePath []string `yaml:"excludepath"` //不需要验证的路径信息
 }
 
 //Init 对外服务实例化
-func Init() {
+func Init() *Server {
 	set := defaultConfig()
 	if err := config.UnmarshalFile("server.yaml", set); err != nil {
-		logger.Error(err)
+		logger.Fatal(err)
 	}
+	return newserver(set)
 }
 
 func defaultConfig() *Setting {
@@ -37,9 +39,10 @@ func defaultConfig() *Setting {
 			Mode: "debug",
 			Port: 8080,
 		},
-		Jwt: Jwt{
-			TimeOut: 1800,
-			Secret:  "qwertyuiop",
+		Jwt: JwtConf{
+			TimeOut:     1800,
+			Secret:      "qwertyuiop",
+			ExcludePath: []string{},
 		},
 	}
 }

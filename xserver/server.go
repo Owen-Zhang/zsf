@@ -7,11 +7,14 @@ import (
 	"time"
 
 	"github.com/Owen-Zhang/zsf/common/cast"
-	"github.com/Owen-Zhang/zsf/common/xjwt"
+	"github.com/Owen-Zhang/zsf/xserver/middleware"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/toolkits/pkg/logger"
 )
+
+//RouteFunc 为注册route用到
+type RouteFunc func(*Server)
 
 //Server api服务
 type Server struct {
@@ -35,8 +38,13 @@ func newserver(set *Setting) *Server {
 //Start api开始监听服务
 func (s *Server) Start() {
 	gin.SetMode(s.config.Http.Mode)
-	//还需要recover
-	s.Engine.Use(cors(), auth(s.config.Jwt.Secret, s.config.Jwt.TimeOut))
+	s.Engine.Use(
+		middleware.Recovery(),
+		middleware.Log(),
+		middleware.Cors(),
+		middleware.Auth(s.config.Jwt),
+		middleware.Response(),
+	)
 	s.server.Addr = fmt.Sprintf(":%d", s.config.Http.Port)
 	s.server.Handler = s.Engine
 
@@ -63,16 +71,6 @@ func (s *Server) Shutdown() {
 	logger.Info("端口服务正常关闭")
 }
 
-//GetLoginInfo 获取登陆用户信息
-func GetLoginInfo(c *gin.Context, out interface{}) error {
-	data, ok := c.Get("login_data")
-	if !ok {
-		return nil
-	}
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	return json.Unmarshal([]byte(cast.ToString(data)), out)
-}
-
 //SetLoginToken 向客户发送token信息
 func SetLoginToken(c *gin.Context, data interface{}) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -81,10 +79,15 @@ func SetLoginToken(c *gin.Context, data interface{}) {
 		logger.Errorf("序列化用户登陆信息出错:%+v", err)
 		return
 	}
-	tokenNew, err := xjwt.Encrypt(secret, string(tokenBytes), timeOut)
-	if err != nil {
-		logger.Errorf("生成token出错:%+v", err)
-		return
+	c.Set("login_data", tokenBytes)
+}
+
+//GetLoginInfo 获取登陆用户信息
+func GetLoginInfo(c *gin.Context, out interface{}) error {
+	data, ok := c.Get("login_data")
+	if !ok {
+		return nil
 	}
-	c.Writer.Header().Set("token", tokenNew)
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	return json.Unmarshal([]byte(cast.ToString(data)), out)
 }

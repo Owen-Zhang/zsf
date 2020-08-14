@@ -4,3 +4,5 @@ http:
 jwt:
   timeout: 3600
   secret: qwertyuiop
+  excludepath:
+  - "/login"

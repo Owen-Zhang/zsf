@@ -7,7 +7,7 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
-func log() gin.HandlerFunc {
+func Log() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
