@@ -49,8 +49,8 @@ func newserver(set *config.Setting) *Server {
 		Engine: ginEngine,
 		config: set,
 		server: &http.Server{
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
+			ReadTimeout:    60 * time.Second,
+			WriteTimeout:   60 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		},
 	}

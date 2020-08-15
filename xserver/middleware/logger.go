@@ -7,10 +7,11 @@ import (
 	"github.com/toolkits/pkg/logger"
 )
 
+//Log 记录访问的地址、时间等
 func Log() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		logger.Infof("[method:%s];[path:%s];[res-status:%d];[time:%13v]", c.Request.Method, c.Request.URL.Path, c.Writer.Status, time.Now().Sub(start)/time.Second)
+		logger.Infof("[method:%s];[path:%s];[status:%d];[time:%d (ms)]", c.Request.Method, c.Request.URL.Path, c.Writer.Status(), time.Since(start)/time.Millisecond)
 	}
 }
