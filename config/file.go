@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/fsnotify/fsnotify"
-	"github.com/toolkits/pkg/logger"
 )
 
 const fileConfigDir = "etc"
@@ -30,14 +30,14 @@ func NewFileSource() IProvider {
 func (f FileSource) watch() {
 	fileWather, err := fsnotify.NewWatcher()
 	if err != nil {
-		logger.Errorf("监控配制文件变化出现错误: %+v", err)
+		logger.FrameLog.Errorf("监控配制文件变化出现错误: %+v", err)
 		return
 	}
 	defer fileWather.Close()
 	//这里只能watch文件夹，watch文件不能正常的收到更新信息,而且windows下有两次更新提醒
 	//所以这个只能用在linux下面,其它平台没有测试
 	if err := fileWather.Add("etc"); err != nil {
-		logger.Errorf("增加监控目录[etc]出现错误: %+v", err)
+		logger.FrameLog.Errorf("增加监控目录[etc]出现错误: %+v", err)
 		return
 	}
 	for {
@@ -64,7 +64,7 @@ func (f FileSource) watch() {
 			if !ok {
 				return
 			}
-			logger.Errorf("fileWather返回错误: %+v", err)
+			logger.FrameLog.Errorf("fileWather返回错误: %+v", err)
 		}
 	}
 }
@@ -73,7 +73,7 @@ func (f FileSource) watch() {
 func (f FileSource) Get(fileName string) (result []byte) {
 	result, err := ioutil.ReadFile(filepath.Join(fileConfigDir, fileName))
 	if err != nil {
-		logger.Errorf("返回单个文件配制信息出错: %+v", err)
+		logger.FrameLog.Errorf("返回单个文件配制信息出错: %+v", err)
 		return
 	}
 	return

@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/Owen-Zhang/zsf/common/model"
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/toolkits/pkg/logger"
 )
 
 var (
@@ -47,7 +47,7 @@ func Recovery() gin.HandlerFunc {
 				// 		headers[idx] = current[0] + ": *"
 				// 	}
 				// }
-				logger.Errorf("[Recovery] [%s] panic recovered:\n%s\n%s\n%s",
+				logger.FrameLog.Errorf("[Recovery] [%s] panic recovered:\n%s\n%s\n%s",
 					timeFormat(time.Now()), strings.Join(headers, "\r\n"), err, stack)
 
 				if brokenPipe {

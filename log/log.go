@@ -2,34 +2,30 @@ package log
 
 import (
 	"github.com/Owen-Zhang/zsf/config"
-	"github.com/toolkits/pkg/logger"
+	"github.com/Owen-Zhang/zsf/logger"
 )
 
 //Init 初始化日志组件
-func Init() {
-	lb, err := logger.NewFileBackend("logs")
-	if err != nil {
-		panic(err)
-	}
-	lb.SetRotateByHour(true)
-	lb.SetKeepHours(24)
-	logger.SetLogging(logger.ERROR, lb)
-}
-
-//Update 更新日志配制信息
 //level: "FATAL","ERROR","WARNING","INFO","DEBUG"
-func Update() {
+func Init() {
 	set := defaultConfig()
 	if err := config.UnmarshalFile("logger.yaml", set); err != nil {
-		logger.Error(err)
+		logger.FrameLog.Errorf("读取日志配制信息出错:%v", err)
 		return
 	}
-	logger.SetSeverity(set.Level)
-	logger.SetKeepHours(set.KeepHours)
-	logger.SetRotateByHour(set.RotateByHour)
+
+	lb, err := logger.NewFileLog("logs/business")
+	if err != nil {
+		logger.FrameLog.Errorf("new日志记录实例,NewFileLog出错:%v", err)
+		return
+	}
+	lb.SetRotateByHour(set.RotateByHour)
+	lb.SetKeepHours(set.KeepHours)
+	logger.SetLogging(set.Level, lb)
 }
 
 //Close 关闭日志(flush到disk)
 func Close() {
+	logger.FrameLog.Close()
 	logger.Close()
 }

@@ -8,11 +8,11 @@ import (
 
 	"github.com/Owen-Zhang/zsf/common/cast"
 	cnf "github.com/Owen-Zhang/zsf/config"
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/Owen-Zhang/zsf/xserver/middleware"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/toolkits/pkg/logger"
 )
 
 //RouteFunc 为注册route用到
@@ -29,7 +29,7 @@ type Server struct {
 func Init() *Server {
 	set := config.DefaultConfig()
 	if err := cnf.UnmarshalFile("server.yaml", set); err != nil {
-		logger.Fatal(err)
+		logger.FrameLog.Error(err)
 	}
 	return newserver(set)
 }
@@ -70,11 +70,11 @@ func (s *Server) Start() {
 	s.server.Handler = s.Engine
 
 	go func() {
-		logger.Infof("开始启动服务,对外端口为: %d", s.config.Http.Port)
+		logger.FrameLog.Infof("开始启动服务,对外端口为: %d", s.config.Http.Port)
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("服务启动失败:%+v", err)
+			logger.FrameLog.Errorf("服务启动失败:%+v", err)
 		}
-		logger.Infof("服务启动成功,对外端口为: %d", s.config.Http.Port)
+		logger.FrameLog.Infof("服务启动成功,对外端口为: %d", s.config.Http.Port)
 	}()
 }
 
@@ -84,13 +84,13 @@ func (s *Server) Shutdown() {
 	defer cancle()
 
 	if err := s.server.Shutdown(ctx); err != nil {
-		logger.Fatalf("关闭服务出错:%+v", err)
+		logger.FrameLog.Fatalf("关闭服务出错:%+v", err)
 	}
 	select {
 	case <-ctx.Done():
-		logger.Error("关闭服务等待5秒,时间以过")
+		logger.FrameLog.Error("关闭服务等待5秒,时间以过")
 	}
-	logger.Info("端口服务正常关闭")
+	logger.FrameLog.Info("端口服务正常关闭")
 }
 
 //SetLoginToken 向客户发送token信息
@@ -98,7 +98,7 @@ func SetLoginToken(c *gin.Context, data interface{}) {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	tokenBytes, err := json.Marshal(&data)
 	if err != nil {
-		logger.Errorf("序列化用户登陆信息出错:%+v", err)
+		logger.FrameLog.Errorf("序列化用户登陆信息出错:%+v", err)
 		return
 	}
 	c.Set("login_data", tokenBytes)

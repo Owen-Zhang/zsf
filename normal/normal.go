@@ -4,14 +4,14 @@ import (
 	"runtime"
 
 	"github.com/Owen-Zhang/zsf/config"
-	"github.com/toolkits/pkg/logger"
+	"github.com/Owen-Zhang/zsf/logger"
 )
 
 //Init 初始系统运行参数
 func Init() {
 	systemInfo := defaultConfig()
 	if err := config.UnmarshalFile("common.yaml", &systemInfo); err != nil {
-		logger.Error(err)
+		logger.FrameLog.Error(err)
 		return
 	}
 	runtime.GOMAXPROCS(systemInfo.MaxProc)

@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"github.com/Owen-Zhang/zsf/common/xjwt"
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/gin-gonic/gin"
-	"github.com/toolkits/pkg/logger"
 )
 
 const TOKEN = "Token"
@@ -27,7 +27,7 @@ func AuthValid(jwtConfig config.JwtConf) gin.HandlerFunc {
 
 		data, err := xjwt.Decrypt(token, jwtConfig.Secret)
 		if err != nil {
-			logger.Errorf("Token 解析出错:%+v", err)
+			logger.FrameLog.Errorf("Token 解析出错:%+v", err)
 			c.AbortWithStatus(403)
 			return
 		}

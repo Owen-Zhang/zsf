@@ -1,9 +1,10 @@
 package xjwt
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/Owen-Zhang/zsf/common/cast"
 )
 
 type User struct {
@@ -25,19 +26,12 @@ func Testjwt(t *testing.T) {
 	}
 	fmt.Println(signStr)
 	fmt.Println("---------------------------------")
-	var user User
-	if err := Decrypt(signStr, "123456", &user); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(user)
-	dataUser, err := json.Marshal(&user)
+	str, err := Decrypt(signStr, "123456")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(dataUser))
+	fmt.Println(cast.ToString(str))
 }
 
 //go test -v -bench=. -run=none

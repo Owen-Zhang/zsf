@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"github.com/Owen-Zhang/zsf/common/xjwt"
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/gin-gonic/gin"
-	"github.com/toolkits/pkg/logger"
 )
 
 //AuthReply 返回数据前返回token
@@ -19,7 +19,7 @@ func AuthReply(jwtConfig config.JwtConf) gin.HandlerFunc {
 		}
 		tokenNew, err := xjwt.Encrypt(jwtConfig.Secret, data, jwtConfig.TimeOut)
 		if err != nil {
-			logger.Errorf("生成Token出错:%+v", err)
+			logger.FrameLog.Errorf("生成Token出错:%+v", err)
 			return
 		}
 		c.Header(TOKEN, tokenNew)

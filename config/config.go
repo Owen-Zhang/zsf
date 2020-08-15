@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/toolkits/pkg/logger"
+	"github.com/Owen-Zhang/zsf/logger"
 	"gopkg.in/yaml.v2"
 )
 
@@ -64,7 +64,7 @@ func wathChange() {
 		select {
 		case event, ok := <-def.provider.Notify():
 			if !ok {
-				logger.Error("监控配制更新的channel关闭")
+				logger.FrameLog.Error("监控配制更新的channel关闭")
 				return
 			}
 			updateConfig(event.FileName, event.Content)

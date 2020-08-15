@@ -13,9 +13,8 @@ type Application struct {
 
 //New 返回实例
 func New() *Application {
-	log.Init()
 	config.Init()
-	log.Update()
+	log.Init()
 	app := &Application{
 		api: xserver.Init(),
 	}
