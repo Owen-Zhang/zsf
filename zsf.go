@@ -1,14 +1,19 @@
 package zsf
 
 import (
+	"sync"
+
+	"github.com/Owen-Zhang/zsf/common/signals"
 	"github.com/Owen-Zhang/zsf/config"
 	"github.com/Owen-Zhang/zsf/log"
+	"github.com/Owen-Zhang/zsf/logger"
 	"github.com/Owen-Zhang/zsf/xserver"
 )
 
 //Application 对象实体
 type Application struct {
-	api *xserver.Server
+	api      *xserver.Server
+	stopOnce sync.Once
 }
 
 //New 返回实例
@@ -29,9 +34,27 @@ func (app *Application) InitRoute(route xserver.RouteFunc) {
 //Start 开始运行
 func (app *Application) Start() {
 	app.api.Start()
+	app.waitSignals()
 }
 
-//Close 关闭要处理的一些事情
-func (app *Application) Close() {
-	log.Close()
+//waitSignals 监听系统结束信息
+func (app *Application) waitSignals() {
+	logger.FrameLog.Info("监听进程结束信号")
+	signals.Shutdown(func() {
+		app.stop()
+	})
+}
+
+//stop 退出相关服务
+func (app *Application) stop() {
+	app.stopOnce.Do(
+		func() {
+			//关闭api服务
+			//关闭注册服务
+			//关闭redis连接服务
+			//关闭数据库连接服务
+			//.....
+			app.api.Stop()
+			log.Close()
+		})
 }

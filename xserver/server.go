@@ -58,14 +58,6 @@ func newserver(set *config.Setting) *Server {
 
 //Start api开始监听服务
 func (s *Server) Start() {
-	// gin.SetMode(s.config.Http.Mode)
-	// s.Engine.Use(
-	// 	middleware.Recovery(),
-	// 	middleware.Log(),
-	// 	middleware.Cors(),
-	// 	middleware.Auth(s.config.Jwt),
-	// 	middleware.Response(),
-	// )
 	s.server.Addr = fmt.Sprintf(":%d", s.config.Http.Port)
 	s.server.Handler = s.Engine
 
@@ -78,8 +70,8 @@ func (s *Server) Start() {
 	}()
 }
 
-//Shutdown 关闭端口服务
-func (s *Server) Shutdown() {
+//Stop 直接关闭api服务
+func (s *Server) Stop() {
 	ctx, cancle := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancle()
 
