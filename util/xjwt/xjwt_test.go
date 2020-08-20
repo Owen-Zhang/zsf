@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Owen-Zhang/zsf/common/cast"
+	"github.com/Owen-Zhang/zsf/util/cast"
 )
 
 type User struct {

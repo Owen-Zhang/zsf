@@ -3,10 +3,11 @@ package zsf
 import (
 	"sync"
 
-	"github.com/Owen-Zhang/zsf/common/signals"
-	"github.com/Owen-Zhang/zsf/config"
-	"github.com/Owen-Zhang/zsf/log"
+	"github.com/Owen-Zhang/zsf/conf"
+	"github.com/Owen-Zhang/zsf/init/log"
+	"github.com/Owen-Zhang/zsf/init/normal"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/util/signals"
 	"github.com/Owen-Zhang/zsf/xserver"
 )
 
@@ -18,7 +19,8 @@ type Application struct {
 
 //New 返回实例
 func New() *Application {
-	config.Init()
+	conf.Init()
+	normal.Init()
 	log.Init()
 	app := &Application{
 		api: xserver.Init(),

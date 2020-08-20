@@ -1,4 +1,4 @@
-package config
+package conf
 
 //Event 通知信息实体
 type Event struct {

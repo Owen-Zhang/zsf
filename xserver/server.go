@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Owen-Zhang/zsf/common/cast"
-	cnf "github.com/Owen-Zhang/zsf/config"
+	cnf "github.com/Owen-Zhang/zsf/conf"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/util/cast"
 	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/Owen-Zhang/zsf/xserver/middleware"
 	"github.com/gin-gonic/gin"

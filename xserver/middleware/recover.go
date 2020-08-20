@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Owen-Zhang/zsf/common/model"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/util/model"
 	"github.com/gin-gonic/gin"
 )
 

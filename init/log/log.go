@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/Owen-Zhang/zsf/config"
+	"github.com/Owen-Zhang/zsf/conf"
 	"github.com/Owen-Zhang/zsf/logger"
 )
 
@@ -9,7 +9,7 @@ import (
 //level: "FATAL","ERROR","WARNING","INFO","DEBUG"
 func Init() {
 	set := defaultConfig()
-	if err := config.UnmarshalFile("logger.yaml", set); err != nil {
+	if err := conf.UnmarshalFile("logger.yaml", set); err != nil {
 		logger.FrameLog.Errorf("读取日志配制信息出错:%v", err)
 		return
 	}

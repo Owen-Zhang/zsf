@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/Owen-Zhang/zsf/common/xjwt"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/util/xjwt"
 	"github.com/Owen-Zhang/zsf/xserver/config"
 	"github.com/gin-gonic/gin"
 )

@@ -1,4 +1,4 @@
-package config
+package conf
 
 //IProvider 配制提供接口
 type IProvider interface {

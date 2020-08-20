@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/Owen-Zhang/zsf/common/model"
-	"github.com/Owen-Zhang/zsf/common/xerrors"
+	"github.com/Owen-Zhang/zsf/util/model"
+	"github.com/Owen-Zhang/zsf/util/xerrors"
 	"github.com/gin-gonic/gin"
 )
 
