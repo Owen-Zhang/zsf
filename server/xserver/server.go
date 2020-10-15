@@ -2,6 +2,7 @@ package xserver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -30,6 +31,7 @@ func Init() *Server {
 	set := config.DefaultConfig()
 	if err := cnf.UnmarshalFile("server.yaml", set); err != nil {
 		logger.FrameLog.Error(err)
+		return nil
 	}
 	return newserver(set)
 }
@@ -57,32 +59,30 @@ func newserver(set *config.Setting) *Server {
 }
 
 //Start api开始监听服务
-func (s *Server) Start() {
+func (s *Server) Start() error {
 	s.server.Addr = fmt.Sprintf(":%d", s.config.Http.Port)
 	s.server.Handler = s.Engine
 
-	go func() {
-		logger.FrameLog.Infof("开始启动服务,对外端口为: %d", s.config.Http.Port)
-		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.FrameLog.Errorf("服务启动失败:%+v", err)
-		}
-		logger.FrameLog.Infof("服务启动成功,对外端口为: %d", s.config.Http.Port)
-	}()
+	logger.FrameLog.Infof("启动服务,对外端口为: %d", s.config.Http.Port)
+	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return fmt.Errorf("服务启动失败:%+v", err)
+	}
+	return nil
 }
 
 //Stop 直接关闭api服务
-func (s *Server) Stop() {
+func (s *Server) Stop() error {
 	ctx, cancle := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancle()
 
 	if err := s.server.Shutdown(ctx); err != nil {
-		logger.FrameLog.Fatalf("关闭服务出错:%+v", err)
+		return fmt.Errorf("关闭服务出错:%+v", err)
 	}
 	select {
 	case <-ctx.Done():
-		logger.FrameLog.Error("关闭服务等待5秒,时间以过")
+		return errors.New("关闭服务等待5秒,时间以过")
 	}
-	logger.FrameLog.Info("端口服务正常关闭")
+	return nil
 }
 
 //SetLoginToken 向客户发送token信息

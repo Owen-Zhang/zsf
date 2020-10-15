@@ -7,31 +7,75 @@ import (
 	"github.com/Owen-Zhang/zsf/init/log"
 	"github.com/Owen-Zhang/zsf/init/normal"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/server"
+	"github.com/Owen-Zhang/zsf/server/governor"
 	"github.com/Owen-Zhang/zsf/util/signals"
-	"github.com/Owen-Zhang/zsf/xserver"
 )
 
 //Application 对象实体
 type Application struct {
-	api      *xserver.Server
-	stopOnce sync.Once
+	initOne     sync.Once
+	startUpOnce sync.Once
+	stopOnce    sync.Once
+	serMutex    *sync.RWMutex
+
+	servers []server.IServer
+	// api      *xserver.Server
+	// governor *governor.Server
+
 }
 
 //New 返回实例
 func New() *Application {
-	conf.Init()
-	normal.Init()
-	log.Init()
-	app := &Application{
-		api: xserver.Init(),
-	}
+	app := &Application{}
+	app.initialize()
+	app.startUp()
+
 	return app
 }
 
-//InitRoute 提供给外部初始化菜单数据
-func (app *Application) InitRoute(route xserver.RouteFunc) {
-	route(app.api)
+func (app *Application) initialize() {
+	app.initOne.Do(func() {
+		app.serMutex = &sync.RWMutex{}
+		app.servers = make([]server.IServer, 0)
+	})
 }
+
+func (app *Application) startUp() {
+	app.startUpOnce.Do(func() {
+		conf.Init()
+		normal.Init()
+		log.Init()
+
+	})
+
+	// app := &Application{
+	// 	api:      xserver.Init(),
+	// 	governor: governor.Init(),
+	// }
+}
+
+func (app *Application) initGovernor() error {
+	s := governor.Init()
+	if s == nil {
+		return nil
+	}
+	app.Serve(s)
+	return nil
+}
+
+//Serve 加入外部访问服务
+func (app *Application) Serve(s ...server.IServer) error {
+	app.serMutex.Lock()
+	defer app.serMutex.Unlock()
+	app.servers = append(app.servers, s...)
+	return nil
+}
+
+//InitRoute 提供给外部初始化菜单数据
+// func (app *Application) InitRoute(route xserver.RouteFunc) {
+// 	route(app.api)
+// }
 
 //Start 开始运行
 func (app *Application) Start() {
