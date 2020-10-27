@@ -9,9 +9,11 @@ import (
 
 	cnf "github.com/Owen-Zhang/zsf/conf"
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/server"
+	"github.com/Owen-Zhang/zsf/server/xserver/config"
+	"github.com/Owen-Zhang/zsf/server/xserver/middleware"
 	"github.com/Owen-Zhang/zsf/util/cast"
-	"github.com/Owen-Zhang/zsf/xserver/config"
-	"github.com/Owen-Zhang/zsf/xserver/middleware"
+	"github.com/Owen-Zhang/zsf/util/xnet"
 	"github.com/gin-gonic/gin"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -55,6 +57,19 @@ func newserver(set *config.Setting) *Server {
 			WriteTimeout:   60 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		},
+	}
+}
+
+//Info 服务信息(此处需要重新构思)
+func (s *Server) Info() *server.ServiceInfo {
+	ip, _, _ := xnet.GetLocalMainIP()
+	return &server.ServiceInfo{
+		Name:    "",
+		Scheme:  "http",
+		Address: ip,
+		Port:    8090,
+		Enable:  true,
+		Group:   "goods",
 	}
 }
 

@@ -10,19 +10,18 @@ import (
 	"github.com/Owen-Zhang/zsf/server"
 	"github.com/Owen-Zhang/zsf/server/governor"
 	"github.com/Owen-Zhang/zsf/util/signals"
+	"github.com/Owen-Zhang/zsf/util/xcycle"
 )
 
 //Application 对象实体
 type Application struct {
+	cycle       *xcycle.Cycle
 	initOne     sync.Once
 	startUpOnce sync.Once
 	stopOnce    sync.Once
 	serMutex    *sync.RWMutex
 
 	servers []server.IServer
-	// api      *xserver.Server
-	// governor *governor.Server
-
 }
 
 //New 返回实例
@@ -36,6 +35,7 @@ func New() *Application {
 
 func (app *Application) initialize() {
 	app.initOne.Do(func() {
+		app.cycle = xcycle.NewCycle()
 		app.serMutex = &sync.RWMutex{}
 		app.servers = make([]server.IServer, 0)
 	})
@@ -46,13 +46,8 @@ func (app *Application) startUp() {
 		conf.Init()
 		normal.Init()
 		log.Init()
-
+		app.initGovernor()
 	})
-
-	// app := &Application{
-	// 	api:      xserver.Init(),
-	// 	governor: governor.Init(),
-	// }
 }
 
 func (app *Application) initGovernor() error {
@@ -77,10 +72,21 @@ func (app *Application) Serve(s ...server.IServer) error {
 // 	route(app.api)
 // }
 
-//Start 开始运行
+//Start 初始化相关的实例
 func (app *Application) Start() {
-	app.api.Start()
+	app.startUp()
+}
+
+//Run 启动服务,开始运行
+func (app *Application) Run() {
 	app.waitSignals()
+	defer app.clean()
+	app.startServers()
+	if err := <-app.cycle.Wait(); err != nil {
+		logger.Errorf("shutdown with error: %+v", err)
+		return
+	}
+	logger.Info("shutdown normal,bye")
 }
 
 //waitSignals 监听系统结束信息
@@ -91,16 +97,31 @@ func (app *Application) waitSignals() {
 	})
 }
 
+//startServers 启动web服务
+func (app *Application) startServers() {
+	for _, s := range app.servers {
+		app.cycle.Run(func() error {
+			return s.Start()
+		})
+	}
+}
+
+//clean 结束程序后做一些清理工作
+func (app *Application) clean() {
+	logger.FrameLog.Close()
+	logger.Close()
+}
+
 //stop 退出相关服务
 func (app *Application) stop() {
 	app.stopOnce.Do(
 		func() {
-			//关闭api服务
-			//关闭注册服务
-			//关闭redis连接服务
-			//关闭数据库连接服务
-			//.....
-			app.api.Stop()
-			log.Close()
+			app.serMutex.RLock()
+			for _, server := range app.servers {
+				server.Stop()
+			}
+			app.serMutex.RUnlock()
+			<-app.cycle.Done()
+			app.cycle.Close()
 		})
 }
