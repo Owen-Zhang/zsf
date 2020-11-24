@@ -67,31 +67,21 @@ func (app *Application) Serve(s ...server.IServer) error {
 	return nil
 }
 
-//InitRoute 提供给外部初始化菜单数据
-// func (app *Application) InitRoute(route xserver.RouteFunc) {
-// 	route(app.api)
-// }
-
-//Start 初始化相关的实例
-func (app *Application) Start() {
-	app.startUp()
-}
-
 //Run 启动服务,开始运行
 func (app *Application) Run() {
 	app.waitSignals()
 	defer app.clean()
 	app.startServers()
 	if err := <-app.cycle.Wait(); err != nil {
-		logger.Errorf("shutdown with error: %+v", err)
+		logger.FrameLog.Errorf("shutdown with error: %+v", err)
 		return
 	}
-	logger.Info("shutdown normal,bye")
+	logger.FrameLog.Info("shutdown normal,bye")
 }
 
 //waitSignals 监听系统结束信息
 func (app *Application) waitSignals() {
-	logger.FrameLog.Info("监听进程结束信号")
+	logger.FrameLog.Info("开始监听进程结束信号")
 	signals.Shutdown(func() {
 		app.stop()
 	})
@@ -100,6 +90,7 @@ func (app *Application) waitSignals() {
 //startServers 启动web服务
 func (app *Application) startServers() {
 	for _, s := range app.servers {
+		s := s
 		app.cycle.Run(func() error {
 			return s.Start()
 		})
@@ -123,5 +114,6 @@ func (app *Application) stop() {
 			app.serMutex.RUnlock()
 			<-app.cycle.Done()
 			app.cycle.Close()
+			app.clean()
 		})
 }

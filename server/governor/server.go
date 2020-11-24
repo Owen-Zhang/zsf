@@ -24,10 +24,10 @@ type Server struct {
 }
 
 func newServer(config *Config) *Server {
-	address := fmt.Sprintf("%s:%d", config.Host, config.Port)
+	address := fmt.Sprintf(":%d", config.Port)
 	lister, err := net.Listen("tcp4", address)
 	if err != nil {
-		logger.Fatalf("启动governor时出现错误:%v", err)
+		logger.FrameLog.Fatalf("启动governor时出现错误:%v", err)
 	}
 
 	return &Server{
@@ -55,11 +55,12 @@ func (s *Server) Info() *server.ServiceInfo {
 
 //Start 开启服务
 func (s *Server) Start() error {
+	logger.FrameLog.Infof("监控及查看配制服务启动,端口为: %d", s.Config.Port)
 	err := s.Server.Serve(s.listener)
+	fmt.Println(err)
 	if err != nil && err != http.ErrServerClosed {
 		return err
 	}
-	logger.FrameLog.Infof("监控及查看配制服务启动成功,端口为: %d", s.Config.Port)
 	return nil
 }
 

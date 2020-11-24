@@ -75,6 +75,7 @@ func (s *Server) Info() *server.ServiceInfo {
 
 //Start api开始监听服务
 func (s *Server) Start() error {
+	// fmt.Println(s.config)
 	s.server.Addr = fmt.Sprintf(":%d", s.config.Http.Port)
 	s.server.Handler = s.Engine
 
@@ -97,7 +98,6 @@ func (s *Server) Stop() error {
 	case <-ctx.Done():
 		return errors.New("关闭服务等待5秒,时间以过")
 	}
-	return nil
 }
 
 //SetLoginToken 向客户发送token信息

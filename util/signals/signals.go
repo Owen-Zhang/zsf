@@ -7,7 +7,7 @@ import (
 
 //Shutdown 结束应用
 func Shutdown(stop func()) {
-	sig := make(chan os.Signal, 1)
+	sig := make(chan os.Signal)
 	signal.Notify(sig, shutdownSignals...)
 
 	go func() {
