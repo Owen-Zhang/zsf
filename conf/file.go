@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Owen-Zhang/zsf/logger"
+	"github.com/Owen-Zhang/zsf/util/xgo"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -22,29 +23,29 @@ func NewFileSource() IProvider {
 	fileSource := &FileSource{
 		changed: make(chan Event, 6),
 	}
-	go fileSource.watch()
+	xgo.Go(fileSource.watch)
 	return fileSource
 }
 
 //watch 监控文件变化
-func (f FileSource) watch() {
+func (f FileSource) watch() error {
 	fileWather, err := fsnotify.NewWatcher()
 	if err != nil {
 		logger.FrameLog.Errorf("监控配制文件变化出现错误: %+v", err)
-		return
+		return err
 	}
 	defer fileWather.Close()
 	//这里只能watch文件夹，watch文件不能正常的收到更新信息,而且windows下有两次更新提醒
 	//所以这个只能用在linux下面,其它平台没有测试
 	if err := fileWather.Add("etc"); err != nil {
 		logger.FrameLog.Errorf("增加监控目录[etc]出现错误: %+v", err)
-		return
+		return err
 	}
 	for {
 		select {
 		case event, ok := <-fileWather.Events:
 			if !ok {
-				return
+				return nil
 			}
 			//如果新增配制文件需要保存一下，如果监控create会造成在修改文件时同时会
 			//触发write和create
@@ -62,7 +63,7 @@ func (f FileSource) watch() {
 			}
 		case err, ok := <-fileWather.Errors:
 			if !ok {
-				return
+				return err
 			}
 			logger.FrameLog.Errorf("fileWather返回错误: %+v", err)
 		}

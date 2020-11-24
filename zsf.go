@@ -11,6 +11,7 @@ import (
 	"github.com/Owen-Zhang/zsf/server/governor"
 	"github.com/Owen-Zhang/zsf/util/signals"
 	"github.com/Owen-Zhang/zsf/util/xcycle"
+	"golang.org/x/sync/errgroup"
 )
 
 //Application 对象实体
@@ -71,7 +72,7 @@ func (app *Application) Serve(s ...server.IServer) error {
 func (app *Application) Run() {
 	app.waitSignals()
 	defer app.clean()
-	app.startServers()
+	app.cycle.Run(app.startServers)
 	if err := <-app.cycle.Wait(); err != nil {
 		logger.FrameLog.Errorf("shutdown with error: %+v", err)
 		return
@@ -88,13 +89,17 @@ func (app *Application) waitSignals() {
 }
 
 //startServers 启动web服务
-func (app *Application) startServers() {
+func (app *Application) startServers() error {
+	var eg errgroup.Group
 	for _, s := range app.servers {
 		s := s
-		app.cycle.Run(func() error {
-			return s.Start()
+		eg.Go(func() (err error) {
+			//可以在此注册服务
+			err = s.Start()
+			return
 		})
 	}
+	return eg.Wait()
 }
 
 //clean 结束程序后做一些清理工作
